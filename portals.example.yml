@@ -1,0 +1,85 @@
+# career-ops-lite — portales
+#
+# Copia este fichero a `portals.yml` si quieres usar el escáner.
+# Todo lo demás del proyecto funciona sin él.
+#
+#   node scan.mjs                # barre los portales de abajo
+#
+# Solo se leen agregadores y empresas que tengan un provider en providers/.
+# Si un portal no tiene provider, scan.mjs lo omite en silencio: eso NO es un
+# error de red, es una entrada sin soporte.
+
+job_boards:
+  - name: Computrabajo Colombia — datos
+    careers_url: https://co.computrabajo.com/trabajo-de-datos
+  - name: Computrabajo Colombia — desarrollo
+    careers_url: https://co.computrabajo.com/trabajo-de-desarrollo
+  - name: Computrabajo Colombia — tecnología
+    careers_url: https://co.computrabajo.com/trabajo-de-tecnologia
+  - name: Magneto365 — tecnología
+    careers_url: https://www.magneto365.com/co/trabajos/buscar/tecnologia
+
+  # GetOnBoard no se detecta por URL: hay que nombrar el provider y las
+  # categorías. Slugs válidos, entre otros: programming, machine-learning-ai,
+  # data-science, operations-management, design, sales.
+  - name: GetOnBoard — LATAM
+    provider: getonbrd
+    careers_url: https://www.getonbrd.com/jobs
+    categories:
+      - programming
+      - machine-learning-ai
+
+  # Torre está retirado: su API responde 400 desde 2026 y el provider falla a
+  # propósito. No lo añadas; si lo necesitas, revisa providers/torre.mjs.
+
+# Empresas concretas: cualquier ATS con provider (Greenhouse, Lever, Ashby,
+# Workday, Personio...) se detecta por la URL. Descomenta y añade las tuyas.
+#
+# tracked_companies:
+#   - name: Empresa Ejemplo
+#     careers_url: https://boards.greenhouse.io/empresa-ejemplo
+
+title_filter:
+  # Se evalúa sobre el TÍTULO del puesto. Un positivo que no aparezca en el
+  # título deja la oferta fuera.
+  positive:
+    - datos
+    - data
+    - analista
+    - analyst
+    - engineer
+    - ingeniero
+    - desarrollador
+    - developer
+    - backend
+    - frontend
+    - full stack
+    - devops
+    - qa
+    - producto
+  negative:
+    - practicante
+    - aprendiz
+    - pasantía
+    - becario
+    - interno
+
+location_filter:
+  # Si existe, es una allow-list: lo que no coincida se descarta.
+  # "Remoto" solo coincide si la oferta lo dice en el campo de ubicación.
+  allow:
+    - Colombia
+    - Bogotá
+    - Medellín
+    - Cali
+    - Barranquilla
+    - Bucaramanga
+    - Pereira
+    - Manizales
+    - Remoto
+    - Remote
+    - LATAM
+    - Latinoamérica
+
+# Descarta ofertas más antiguas que esto. 0 desactiva el filtro.
+max_posting_age_days: 45

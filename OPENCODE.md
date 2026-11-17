@@ -1,5 +1,3 @@
 @AGENTS.md
 
-<!-- OpenCode config — imports AGENTS.md -->
-
-Pass `--cli opencode` to `doctor.mjs`.
+<!-- Punto de entrada para OpenCode. Todo el flujo vive en AGENTS.md. -->

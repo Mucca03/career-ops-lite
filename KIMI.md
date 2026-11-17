@@ -1,2 +1,3 @@
 @AGENTS.md
-<!-- Kimi config — imports AGENTS.md, same as CLAUDE.md -->
+
+<!-- Punto de entrada para Kimi. Todo el flujo vive en AGENTS.md. -->

@@ -140,14 +140,13 @@ export const SCAN_HISTORY_PATH = process.env.CAREER_OPS_SCAN_HISTORY || path.joi
 export const PIPELINE_PATH = process.env.CAREER_OPS_PIPELINE || path.join(DATA_ROOT, 'data/pipeline.md');
 
 // The closing hint names the lane's inbox when CAREER_OPS_PIPELINE is set.
-// `/career-ops pipeline` alone reads data/pipeline.md unless the agent's own
-// environment carries the same variable, so a lane run that only says "run
-// pipeline" sends the user to the other lane's inbox (#6379).
+// `/career-ops` alone reads the default inbox, so a lane run that only says
+// "run career-ops" would send the user to the other lane's file (#6379).
 export function pipelineRunHint(lane = process.env.CAREER_OPS_PIPELINE) {
   const file = lane?.trim();
   return file
-    ? `→ Run /career-ops pipeline ${file} to evaluate new offers (this lane's inbox, not data/pipeline.md).`
-    : '→ Run /career-ops pipeline to evaluate new offers.';
+    ? `→ Run /career-ops to evaluate new offers (inbox: ${file}).`
+    : '→ Run /career-ops to evaluate new offers.';
 }
 
 export const APPLICATIONS_PATH = resolveTrackerPath(DATA_ROOT);
@@ -3767,11 +3766,10 @@ export function loadDedupSnapshot(policy = {}, canonicalize = defaultCompanyNorm
   return { seen, identityPromotableUrls, recheckEligible, seenUrlVariants, seenCompanyRoles, seenCompanyRoleBases, seenCompanyRoleRequisitions, locatedRequisitionsByBase, seenCompanyRoleLanguages, locatedLanguagesByBase, fingerprintHistory };
 }
 
-// Standard skeleton created on fresh install — matches the format documented
-// in modes/pipeline.md and expected by /career-ops pipeline.
+// Standard skeleton created on fresh install — the inbox `/career-ops` reads.
 const PIPELINE_SKELETON = `# Pipeline — Pending URLs
 
-Paste job URLs below as \`- [ ] {url}\` then run \`/career-ops pipeline\`.
+Paste job URLs below as \`- [ ] {url}\` then run \`/career-ops\`.
 
 ## Pending
 
@@ -6122,7 +6120,6 @@ async function main() {
   registerRunFailureSnapshot(null);
 
   console.log(`\n${pipelineRunHint()}`);
-  console.log('→ Share results and get help: https://discord.gg/8pRpHETxa4');
 
   if (jsonMode) {
     const filtered = totalFilteredTitle + totalFilteredDeclaredField + totalFilteredTier + totalFilteredLocation

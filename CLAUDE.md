@@ -1,3 +1,3 @@
 @AGENTS.md
 
-<!-- Add Claude Code-specific guidance here only when it has no AGENTS.md counterpart. -->
+<!-- Punto de entrada para Claude Code. Todo el flujo vive en AGENTS.md. -->
