@@ -1,0 +1,30 @@
+lang: es
+name: Nombre Apellido
+title: Analista de Datos
+email: persona@example.com
+location: Bogotá, Colombia
+linkedin: linkedin.com/in/persona-ejemplo
+github: github.com/persona-ejemplo
+summary: >
+  Analista de Datos con tableros de Power BI sobre SQL y Python, y extracción
+  automatizada en Docker.
+competencies:
+  - Python
+  - SQL
+  - Docker
+experience:
+  - company: Empresa Datos
+    role: Analista de Datos
+    dates: 2022 — Presente
+    bullets:
+      - "Tableros de Power BI sobre SQL y Python."
+      - "Automaticé la extracción con Python y Docker."
+  - company: Empresa Soporte
+    role: Soporte Técnico
+    dates: 2020 — 2022
+    bullets:
+      - "Atendí usuarios y documenté incidentes con Linux."
+education:
+  - title: Ingeniería de Sistemas
+    org: Universidad Ejemplo
+    year: "2020"

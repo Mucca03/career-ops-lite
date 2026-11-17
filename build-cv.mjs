@@ -86,6 +86,80 @@ const pick = (obj, ...keys) => {
 };
 const list = (value) => (Array.isArray(value) ? value.filter((v) => v != null && v !== '') : []);
 
+// ── enlaces ────────────────────────────────────────────────────────────────
+// Un CV de cualquier candidato tiene un juego distinto de enlaces: uno trae
+// GitHub y portafolio, otro solo LinkedIn, otro ninguno. El encabezado se
+// construye con los que existan, en orden, sin huecos: un <a> sin texto
+// dejaría su separador "|" colgando del ítem anterior.
+
+const SAFE_SCHEME = /^(https?:|mailto:|tel:)/i;
+
+/** Solo se emiten hrefs con esquema conocido; nada de javascript: ni data:. */
+function safeHref(href) {
+  const value = str(href);
+  return SAFE_SCHEME.test(value) ? value : '';
+}
+
+function absoluteUrl(value) {
+  const raw = str(value);
+  if (!raw) return '';
+  return /^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : `https://${raw}`;
+}
+
+/** Texto visible de un enlace: sin esquema, sin www., sin barra final. */
+function displayUrl(value) {
+  return str(value)
+    .replace(/^https?:\/\//i, '')
+    .replace(/^www\./i, '')
+    .replace(/\/+$/, '');
+}
+
+/** Acepta `links: [{label, url}]` y también `links: ["https://…"]`. */
+function normalizeLinks(raw) {
+  return list(raw).map((entry) => {
+    if (typeof entry === 'string') return { label: '', url: entry };
+    return {
+      label: str(pick(entry, 'label', 'name', 'nombre', 'texto')),
+      url: str(pick(entry, 'url', 'href', 'link')),
+    };
+  }).filter((link) => link.url);
+}
+
+function contactHtml(cv) {
+  const items = [];
+  const seen = new Set();
+  const push = (key, html) => {
+    const id = str(key).toLowerCase();
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    items.push(html);
+  };
+  const addLink = (value, label) => {
+    const href = safeHref(absoluteUrl(value));
+    if (!href) return;
+    push(displayUrl(value), `<a href="${escapeHtml(href)}">${escapeHtml(label || displayUrl(value))}</a>`);
+  };
+
+  if (cv.phone) {
+    const tel = safeHref(`tel:${str(cv.phone).replace(/[^\d+]/g, '')}`);
+    push(tel || `phone:${cv.phone}`, tel
+      ? `<a href="${escapeHtml(tel)}">${escapeHtml(cv.phone)}</a>`
+      : `<span>${escapeHtml(cv.phone)}</span>`);
+  }
+  if (cv.email) {
+    push(`mailto:${str(cv.email).toLowerCase()}`, `<a href="mailto:${escapeHtml(cv.email)}">${escapeHtml(cv.email)}</a>`);
+  }
+  if (cv.linkedin) addLink(cv.linkedin);
+  if (cv.github) addLink(cv.github);
+  if (cv.portfolio) addLink(cv.portfolio);
+  // Dos campos con la misma URL (github y portfolio apuntando al mismo perfil)
+  // se emiten una sola vez: `push` deduplica por URL normalizada.
+  for (const link of cv.links) addLink(link.url, link.label);
+  if (cv.location) push(`location:${cv.location}`, `<span>${escapeHtml(cv.location)}</span>`);
+
+  return items.join('\n      ');
+}
+
 /** Acepta {role|title|puesto|cargo} y company|empresa|org: los modelos pequeños varían. */
 function experienceHtml(entries) {
   return list(entries).map((entry) => {
@@ -114,16 +188,18 @@ function projectsHtml(entries) {
   return list(entries).map((entry) => {
     const name = escapeHtml(pick(entry, 'name', 'nombre') ?? '');
     const url = str(pick(entry, 'url'));
+    const dates = str(pick(entry, 'dates', 'period', 'fechas', 'year', 'anio', 'año'));
     const description = escapeHtml(
       pick(entry, 'description', 'descripcion')
       ?? list(pick(entry, 'bullets', 'logros') ?? []).join(' '),
     );
     const tech = escapeHtml(pick(entry, 'tech', 'tecnologias', 'stack') ?? '');
-    const title = url
-      ? `<a href="${escapeHtml(url)}">${name}</a>`
-      : name;
+    // Un enlace sin esquema seguro no se emite como <a href="">.
+    const href = safeHref(absoluteUrl(url));
+    const title = href ? `<a href="${escapeHtml(href)}">${name}</a>` : name;
+    const when = dates ? ` <span class="project-date">${escapeHtml(dates)}</span>` : '';
     return `<div class="project">
-    <div class="project-title">${title}</div>${description ? `\n    <div class="project-desc">${description}</div>` : ''}${tech ? `\n    <div class="project-tech">${tech}</div>` : ''}
+    <div class="project-title">${title}${when}</div>${description ? `\n    <div class="project-desc">${description}</div>` : ''}${tech ? `\n    <div class="project-tech">${tech}</div>` : ''}
   </div>`;
   }).join('\n  ');
 }
@@ -190,7 +266,9 @@ function normalize(payload) {
     email: str(at('email', 'correo')),
     phone: str(at('phone', 'telefono', 'teléfono')),
     linkedin: str(at('linkedin')),
-    portfolio: str(at('portfolio', 'website', 'web', 'github')),
+    github: str(at('github')),
+    portfolio: str(at('portfolio', 'website', 'web')),
+    links: normalizeLinks(at('links', 'enlaces')),
     location: str(at('location', 'ubicacion', 'ciudad')),
     summary: str(at('summary', 'resumen', 'perfil')),
     competencies: list(at('competencies', 'competencias')),
@@ -244,10 +322,13 @@ function render(cv) {
     PHONE: escapeHtml(cv.phone),
     EMAIL: escapeHtml(cv.email),
     LOCATION: escapeHtml(cv.location),
-    LINKEDIN_URL: escapeHtml(cv.linkedin ? (/^https?:/.test(cv.linkedin) ? cv.linkedin : `https://${cv.linkedin}`) : ''),
-    LINKEDIN_DISPLAY: escapeHtml(cv.linkedin.replace(/^https?:\/\//, '')),
-    PORTFOLIO_URL: escapeHtml(cv.portfolio ? (/^https?:/.test(cv.portfolio) ? cv.portfolio : `https://${cv.portfolio}`) : ''),
-    PORTFOLIO_DISPLAY: escapeHtml(cv.portfolio.replace(/^https?:\/\//, '')),
+    LINKEDIN_URL: escapeHtml(safeHref(absoluteUrl(cv.linkedin))),
+    LINKEDIN_DISPLAY: escapeHtml(cv.linkedin ? displayUrl(cv.linkedin) : ''),
+    GITHUB_URL: escapeHtml(safeHref(absoluteUrl(cv.github))),
+    GITHUB_DISPLAY: escapeHtml(cv.github ? displayUrl(cv.github) : ''),
+    PORTFOLIO_URL: escapeHtml(safeHref(absoluteUrl(cv.portfolio))),
+    PORTFOLIO_DISPLAY: escapeHtml(cv.portfolio ? displayUrl(cv.portfolio) : ''),
+    CONTACT_ROW: contactHtml(cv),
     SECTION_SUMMARY: escapeHtml(titles.summary),
     SECTION_COMPETENCIES: escapeHtml(titles.competencies),
     SECTION_EXPERIENCE: escapeHtml(titles.experience),
@@ -286,6 +367,9 @@ function render(cv) {
   // final lo detecte; blanquearlo lo volvería invisible.
   html = html.replace(/\{\{([A-Z_]+)\}\}/g, (match, key) => (key in subs ? subs[key] : match));
   html = html.replace(/\n[ \t]*<div class="cv-consent">[ \t]*<\/div>/g, '');
+  // Un candidato sin teléfono, enlaces ni ciudad no tiene fila de contacto:
+  // el contenedor vacío solo aportaría el hueco de su margen.
+  html = html.replace(/\n[ \t]*<div class="contact-row">\s*<\/div>/g, '');
 
   const leftover = [...new Set(html.match(/\{\{[A-Z_]+\}\}/g) ?? [])];
   if (leftover.length) {

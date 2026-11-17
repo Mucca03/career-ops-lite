@@ -1,0 +1,44 @@
+# Perfil sintético — candidato con experiencia (dos roles con empresa y fechas).
+# Todo es inventado: ningún dato real de ningún candidato.
+
+candidate:
+  name: "Nombre Apellido"
+  email: "persona@example.com"
+  location: "Bogotá, Colombia"
+  linkedin: "linkedin.com/in/persona-ejemplo"
+  github: "github.com/persona-ejemplo"
+  portfolio: ""
+  links: []
+  stage: "experienced"
+  years_experience: 6
+  timezone: "America/Bogota"
+
+job_search:
+  target_roles:
+    - "Analista de Datos"
+  seniority: "senior"
+  industries: []
+  modality: "híbrido"
+  city: "Bogotá"
+  country: "Colombia"
+  willing_to_relocate: false
+  salary_target: ""
+  currency: "COP"
+  deal_breakers: []
+
+language:
+  output: es
+
+cv:
+  max_pages: 1
+  strict_pages: true
+  page_format: letter
+  mode: auto
+  max_experiences: 5
+  max_projects: 4
+  bullets_per_role: 2
+  max_competencies: 8
+  max_certifications: 3
+
+scoring:
+  apply_threshold: 4.0

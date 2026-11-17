@@ -10,7 +10,11 @@ candidate:
   phone: "+57 300 000 0000"
   location: "Bogotá, Colombia"
   linkedin: "linkedin.com/in/tu-usuario"
-  portfolio: ""              # web, GitHub o portafolio (opcional)
+  github: "github.com/tu-usuario"   # opcional
+  portfolio: ""              # web propia (si es la misma que github, se muestra una vez)
+  links: []                  # enlaces extra: [{ label: "Copr", url: "https://…" }]
+  stage: ""                  # estudiante | junior | experienced (con experiencia)
+  graduation: ""             # fecha esperada, si estudias (ej. "2027-1")
   years_experience: 0        # años de experiencia profesional
   timezone: "America/Bogota"
 
@@ -35,12 +39,15 @@ cv:
   max_pages: 1               # career-ops-lite está diseñado para 1 página
   strict_pages: true         # un CV que desborda falla en vez de avisar
   page_format: letter        # letter (Colombia/LATAM) | a4
+  mode: auto                 # auto | experienced | entry | mixed (auto se deduce de cv.md)
   max_experiences: 5         # roles como máximo en el CV adaptado
-  bullets_per_role: 2        # bullets por rol en el CV adaptado
+  max_projects: 4            # proyectos como máximo en el CV adaptado
+  bullets_per_role: 2        # bullets por rol o proyecto en el CV adaptado
   max_competencies: 8
+  max_certifications: 3
 
 scoring:
-  apply_threshold: 4.0       # por debajo de este score no se genera PDF
+  apply_threshold: 4.0       # 3.5 si eres estudiante o junior; por debajo no se genera PDF
 
 # Presentación del PDF. Todos los valores son opcionales: sin este bloque se
 # usan los del template. Se inyectan como variables CSS en el render.

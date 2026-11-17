@@ -13,7 +13,7 @@
     "pdf": "node generate-pdf.mjs",
     "verify": "node verify-cv-structure.mjs",
     "scan": "node scan.mjs",
-    "test": "node --check extract-jd.mjs && node --check build-cv.mjs && node build-cv.mjs --help >/dev/null && node extract-jd.mjs --help >/dev/null",
+    "test": "node --check extract-jd.mjs && node --check build-cv.mjs && node --check validate-extra.mjs && node build-cv.mjs --help >/dev/null && node extract-jd.mjs --help >/dev/null && node --test tests/*.test.mjs",
     "postinstall": "node -e \"process.exit(['','0','false'].includes((process.env.PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD||'').toLowerCase())?1:0)\" || npx playwright install chromium"
   },
   "keywords": [

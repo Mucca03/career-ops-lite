@@ -1,0 +1,27 @@
+lang: es
+name: Nombre Apellido
+title: Analista de Datos
+email: persona@example.com
+location: Bogotá, Colombia
+github: github.com/persona-ejemplo
+summary: >
+  Analista de Datos con tableros de Power BI y proyectos propios en Python.
+competencies:
+  - Python
+  - SQL
+experience:
+  - company: Empresa Datos
+    role: Analista de Datos
+    dates: 2022 — Presente
+    bullets:
+      - "Tableros de Power BI sobre SQL y Python."
+      - "Automaticé la extracción con Python y Docker."
+projects:
+  - name: Panel Propio
+    dates: 2025
+    description: API REST con FastAPI y PostgreSQL.
+    tech: Python, PostgreSQL
+education:
+  - title: Ingeniería de Sistemas
+    org: Universidad Ejemplo
+    year: "2020"

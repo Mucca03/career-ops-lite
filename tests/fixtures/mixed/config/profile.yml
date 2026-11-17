@@ -1,0 +1,43 @@
+# Perfil sintético — candidato mixto (un rol real y además proyectos).
+# Todo es inventado: ningún dato real de ningún candidato.
+
+candidate:
+  name: "Nombre Apellido"
+  email: "persona@example.com"
+  location: "Bogotá, Colombia"
+  github: "github.com/persona-ejemplo"
+  portfolio: ""
+  links: []
+  stage: "junior"
+  years_experience: 3
+  timezone: "America/Bogota"
+
+job_search:
+  target_roles:
+    - "Analista de Datos"
+  seniority: "junior"
+  industries: []
+  modality: "remoto"
+  city: "Bogotá"
+  country: "Colombia"
+  willing_to_relocate: false
+  salary_target: ""
+  currency: "COP"
+  deal_breakers: []
+
+language:
+  output: es
+
+cv:
+  max_pages: 1
+  strict_pages: true
+  page_format: letter
+  mode: auto
+  max_experiences: 5
+  max_projects: 4
+  bullets_per_role: 2
+  max_competencies: 8
+  max_certifications: 3
+
+scoring:
+  apply_threshold: 3.5

@@ -5,11 +5,14 @@
 **Phone:** +57 300 000 0000
 **LinkedIn:** linkedin.com/in/tu-usuario
 
-> Este es el CV canónico del proyecto. `verify-cv-structure.mjs` y
-> `build-cv.mjs` lo leen para comprobar que el CV adaptado no pierde ni
-> reordena secciones. Sustitúyelo por el tuyo manteniendo estas cabeceras:
+> Este es el CV canónico del proyecto. `build-cv.mjs`, `validate-extra.mjs` y
+> `verify-cv-structure.mjs` lo leen para comprobar que el CV adaptado no pierde
+> ni reordena secciones. Sustitúyelo por el tuyo manteniendo estas cabeceras:
 > `## Professional Summary`, `## Experience`, `## Projects`, `## Education`,
 > `## Skills`.
+>
+> Si todavía no tienes experiencia laboral, borra `## Experience`: tus proyectos
+> y tu formación pasan a ser las secciones principales (modo `entry`).
 
 ## Professional Summary
 

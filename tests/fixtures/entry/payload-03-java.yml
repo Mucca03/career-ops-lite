@@ -1,0 +1,42 @@
+lang: es
+name: Nombre Apellido
+title: Desarrollador Java Junior
+email: persona@example.com
+phone: "+57 300 111 2233"
+location: Bogotá, Colombia
+linkedin: linkedin.com/in/persona-ejemplo
+github: github.com/persona-ejemplo
+portfolio: blog.example.com
+links:
+  - label: Copr
+    url: https://copr.example.org/persona
+summary: >
+  Estudiante de Ingeniería de Sistemas con un motor de reglas en Java e
+  inferencia por encadenamiento hacia adelante.
+competencies:
+  - Java
+  - Swing
+experience: []
+projects:
+  - name: Motor de Reglas
+    dates: 2024
+    description: Motor de inferencia por encadenamiento hacia adelante en Java.
+    tech: Java, Swing
+  - name: Panel de Inventario
+    url: github.com/persona-ejemplo/panel
+    dates: 2025 – Presente
+    description: Reduje el tiempo de carga de 8 s a 2 s al añadir índices en PostgreSQL.
+    tech: Python, FastAPI, PostgreSQL, Docker
+  - name: CLI de Respaldos
+    url: github.com/persona-ejemplo/respaldos
+    dates: 2026
+    description: Automaticé el respaldo diario en Linux con un script en Bash y una cuarentena reversible.
+    tech: Python, Bash, Linux
+education:
+  - title: Ingeniería de Sistemas (8.º semestre)
+    org: Universidad Ejemplo
+    year: "2026"
+certifications:
+  - title: Java Básico
+    org: Universidad Ejemplo
+    year: "2023"

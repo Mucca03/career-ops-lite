@@ -1,0 +1,48 @@
+# Perfil sintético — candidato entry (sin empleos).
+# Todo es inventado: ningún dato real de ningún candidato.
+
+candidate:
+  name: "Nombre Apellido"
+  email: "persona@example.com"
+  phone: "+57 300 111 2233"
+  location: "Bogotá, Colombia"
+  linkedin: "linkedin.com/in/persona-ejemplo"
+  github: "github.com/persona-ejemplo"
+  portfolio: "blog.example.com"
+  links:
+    - label: "Copr"
+      url: "https://copr.example.org/persona"
+  stage: "junior"
+  years_experience: 0
+  timezone: "America/Bogota"
+
+job_search:
+  target_roles:
+    - "Desarrollador Backend Jr."
+    - "Desarrollador Java Jr."
+  seniority: "junior"
+  industries: []
+  modality: "remoto"
+  city: "Bogotá"
+  country: "Colombia"
+  willing_to_relocate: false
+  salary_target: "4.500.000"
+  currency: "COP"
+  deal_breakers: []
+
+language:
+  output: es
+
+cv:
+  max_pages: 1
+  strict_pages: true
+  page_format: letter
+  mode: auto
+  max_experiences: 5
+  max_projects: 4
+  bullets_per_role: 2
+  max_competencies: 8
+  max_certifications: 3
+
+scoring:
+  apply_threshold: 3.5

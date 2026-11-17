@@ -318,6 +318,13 @@
     line-height: 1.55;
   }
 
+  .project-date {
+    font-size: 9.5px;
+    font-weight: 400;
+    color: #888;
+    margin-left: 6px;
+  }
+
   .project-tech {
     font-size: 9.5px;
     color: #888;
@@ -737,11 +744,7 @@
     {{TITLE_BLOCK}}
     <div class="header-gradient"></div>
     <div class="contact-row">
-      <a href="tel:{{PHONE}}">{{PHONE}}</a>
-      <a href="mailto:{{EMAIL}}">{{EMAIL}}</a>
-      <a href="{{LINKEDIN_URL}}">{{LINKEDIN_DISPLAY}}</a>
-      <a href="{{PORTFOLIO_URL}}">{{PORTFOLIO_DISPLAY}}</a>
-      <span>{{LOCATION}}</span>
+      {{CONTACT_ROW}}
     </div>
   </div>
 

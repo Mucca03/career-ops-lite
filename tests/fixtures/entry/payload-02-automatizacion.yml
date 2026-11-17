@@ -1,0 +1,46 @@
+lang: es
+name: Nombre Apellido
+title: Desarrollador Junior · Automatización e IA
+email: persona@example.com
+phone: "+57 300 111 2233"
+location: Bogotá, Colombia
+linkedin: linkedin.com/in/persona-ejemplo
+github: github.com/persona-ejemplo
+portfolio: blog.example.com
+links:
+  - label: Copr
+    url: https://copr.example.org/persona
+summary: >
+  Estudiante de Ingeniería de Sistemas con proyectos propios en Python y Java,
+  y una contribución mergeada en open source.
+competencies:
+  - Python
+  - Linux
+  - Bash
+experience: []
+projects:
+  - name: CLI de Respaldos
+    url: github.com/persona-ejemplo/respaldos
+    dates: 2026
+    description: Automaticé el respaldo diario en Linux con un script en Bash y una cuarentena reversible.
+    tech: Python, Bash, Linux
+  - name: Panel de Inventario
+    url: github.com/persona-ejemplo/panel
+    dates: 2025 – Presente
+    description: Reduje el tiempo de carga de 8 s a 2 s al añadir índices en PostgreSQL.
+    tech: Python, FastAPI, PostgreSQL, Docker
+  - name: Motor de Reglas
+    dates: 2024
+    description: Motor de inferencia por encadenamiento hacia adelante en Java.
+    tech: Java, Swing
+education:
+  - title: Ingeniería de Sistemas (8.º semestre)
+    org: Universidad Ejemplo
+    year: "2026"
+certifications:
+  - title: Linux Essentials
+    org: Linux Foundation
+    year: "2024"
+  - title: Python for Everybody
+    org: Universidad Ejemplo
+    year: "2025"
