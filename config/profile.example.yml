@@ -48,6 +48,8 @@ cv:
 
 scoring:
   apply_threshold: 4.0       # 3.5 si eres estudiante o junior; por debajo no se genera PDF
+  below_threshold: ask       # ask | force | discard (ask: ofrece el CV; force: lo genera; discard: descarta)
+  min_score: 0               # > 0: si el score queda por debajo, pide confirmación una vez
 
 # Presentación del PDF. Todos los valores son opcionales: sin este bloque se
 # usan los del template. Se inyectan como variables CSS en el render.

@@ -2,7 +2,7 @@
 // sin importarlos (`validate-extra.mjs` y `build-cv.mjs` corren `main()` al
 // importarse). Cada test trabaja contra una fixture sintética de tests/fixtures.
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -69,14 +69,46 @@ export function payloadVariant(t, sourcePath, transform) {
   return target;
 }
 
-/** Renderiza un payload con build-cv.mjs y devuelve el HTML. */
+/** Renderiza un payload con build-cv.mjs y devuelve el HTML y el payload.json. */
 export function buildCv(t, payloadPath) {
   const dir = mkdtempSync(join(tmpdir(), 'career-ops-lite-build-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const out = join(dir, 'cv.html');
   const result = runScript('build-cv.mjs', [payloadPath, out]);
+  const payloadPathOut = out.replace(/\.html?$/i, '') + '.payload.json';
   return {
     ...result,
+    out,
+    payloadPath: payloadPathOut,
     html: result.code === 0 ? readFileSync(out, 'utf8') : '',
+    payload: existsSync(payloadPathOut) ? readFileSync(payloadPathOut, 'utf8') : '',
   };
+}
+
+/** Renderiza un HTML a PDF con el Chromium de Playwright que ya usa el repo. */
+export async function renderPdf(html, { format = 'Letter', margin = '0.6in' } = {}) {
+  const { chromium } = await import('playwright');
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'load' });
+    return Buffer.from(await page.pdf({
+      format,
+      printBackground: true,
+      margin: { top: margin, bottom: margin, left: margin, right: margin },
+    }));
+  } finally {
+    await browser.close();
+  }
+}
+
+/** Cuenta páginas de un PDF de Chromium sin dependencias externas. */
+export function pdfPageCount(pdf) {
+  return (pdf.toString('latin1').match(/\/Type\s*\/Page\b/g) ?? []).length;
+}
+
+/** Texto del PDF si `pdftotext` está instalado; null si no. */
+export function pdfText(pdf) {
+  const result = spawnSync('pdftotext', ['-layout', '-', '-'], { input: pdf, encoding: 'utf8' });
+  return result.error ? null : result.stdout;
 }

@@ -1,7 +1,7 @@
 # career-ops-lite
 
 Asistente de empleo para **Colombia y LATAM remoto**. Flujo lineal:
-**extraer → evaluar → (CV de 1 página | descartar)**.
+**extraer → evaluar → (CV de 1 página | ofrecer | descartar)**.
 
 No inventes nada. Todo dato del candidato sale de `cv.md` y `config/profile.yml`.
 Lo que la oferta pida y esos ficheros no prueben es una **brecha**, nunca un hueco
@@ -38,6 +38,9 @@ cp templates/applications.example.md data/applications.md   # solo si falta
 - **Umbral:** si `stage` es *con experiencia* deja `scoring.apply_threshold: 4.0`;
   si es *estudiante* o *junior*, pon `3.5`. Explícalo en una línea: se calibra
   mirando el tracker (lo que llegó a entrevista vs. lo aplicado). Es configurable.
+- En `scoring` deja también `below_threshold: ask` (bajo el umbral se ofrece el
+  CV; `force` lo genera siempre y `discard` lo descarta) y `min_score: 0` (si lo
+  subes, un score por debajo pide confirmación una vez).
 
 Confirma en 3 líneas y sigue.
 
@@ -85,7 +88,11 @@ Veredicto: una línea.
 **Ajustes** = lo que `cv.md` demuestra y la oferta pide. **Brechas** = lo que la
 oferta pide y `cv.md` no prueba; no las maquilles.
 
-**Corte:** score >= `scoring.apply_threshold` → 3A; si no → 3B.
+**Corte:** score >= `scoring.apply_threshold` → 3A. Si no, manda
+`scoring.below_threshold`: `ask` → 3B (ofrece el CV en una línea), `force` → 3A
+con aviso, `discard` → 3B (descarte). Con `scoring.min_score > 0` y un score por
+debajo, pregunta una vez antes de generar. `node threshold.mjs --score X.X`
+aplica estas reglas sin interpretación.
 
 ---
 
@@ -117,11 +124,24 @@ Decídelo leyendo `cv.md`, nunca por el nombre del candidato:
 requisitos centrales de la oferta (stack, dominio, herramientas); empate → el más
 reciente.
 
+**Trazabilidad (A1).** Una herramienta, método, práctica o certificación solo
+puede aparecer en un ítem (`experience[]` o `projects[]`) si `cv.md` se la
+atribuye a ESE ítem. Que exista en otro ítem o en la oferta no basta. Si la IA
+la infiere, no la escribe: va como brecha o `[VERIFICAR]`.
+
+**Redacción (A2).** Cuando un requisito de la oferta describe algo que `cv.md`
+ya demuestra en ese ítem, puedes usar su redacción literal para el ATS. Si el
+ítem no lo respalda, no la uses. Si `cv.md` usa la variante corta o larga de un
+término que la oferta pide (siglas, nombre completo o sinónimo directo), puedes
+usar la de la oferta. Escribe en `lang` con el término establecido, sin calcar
+del inglés.
+
 **Encabezado:** todos los links de `profile.yml` que existan (github, portfolio,
 linkedin, links[]); omite los ausentes. `build-cv.mjs` no deja separadores vacíos.
 
 **Competencias:** solo tecnologías que aparezcan en un bullet o en el stack de un
 ítem **incluido** en este CV. Lo que la oferta pida y no esté respaldado es brecha.
+Si usas `skills[]`, cada categoría y cada ítem siguen la misma regla.
 
 **Certificaciones:** hasta 3 relevantes, si están en `cv.md`. No las recortes
 antes que proyectos poco relevantes.
@@ -136,54 +156,64 @@ Copia la forma del modo que toque. Campos exactos que acepta `build-cv.mjs`:
 ```yaml
 lang: es
 name: Nombre Apellido
-title: Analista de Datos
+title: Puesto Objetivo
 email: tu@email.com
 github: github.com/tu-usuario
 linkedin: linkedin.com/in/tu-usuario
-location: Bogotá, Colombia
+location: Ciudad, País
 summary: >
   Dos líneas: años de experiencia, dominio y el logro que la oferta pide.
-competencies: [SQL, Python, Power BI]
+competencies: [Herramienta A, Método B, Certificación C]
+skills:
+  - category: Categoría 1      # nombre en `lang`; sale de cv.md o del área
+    items: [Herramienta A, Herramienta B]
+  - category: Categoría 2
+    items: [Método C]
 experience:
   - company: Empresa Ejemplo
-    role: Analista de Datos
+    role: Puesto Ejemplo
     dates: 2022 — Presente
     bullets:            # cada bullet sale de cv.md, con su cifra real si la hay
-      - "Construí tableros de Power BI sobre SQL y Python para el área comercial."
+      - "Logro concreto: qué hice, con qué y qué cambió (cifra real)."
   - company: Empresa Anterior
-    role: Analista Jr.
+    role: Puesto Anterior
     dates: 2020 — 2022
     bullets:
-      - "Automaticé la extracción de datos con Python y SQL."
+      - "Otro logro, con su cifra y alcance reales."
 education:
-  - title: Ingeniería de Sistemas
-    org: Universidad Ejemplo
+  - title: Título del estudio
+    org: Institución
     year: "2020"
 ```
 
 ```yaml
 lang: es
 name: Nombre Apellido
-title: Desarrollador Junior
+title: Puesto Objetivo Junior
 email: tu@email.com
 github: github.com/tu-usuario
-location: Bogotá, Colombia
+location: Ciudad, País
 summary: >
-  Dos proyectos propios y una contribución open source mergeada.
-competencies: [Python, PostgreSQL, Docker]
+  Dos líneas: formación, dominio y el logro que la oferta pide.
+competencies: [Herramienta A, Método B]
+skills:
+  - category: Categoría 1
+    items: [Herramienta A, Herramienta B]
 experience: []
 projects:
   - name: Proyecto Uno
     url: github.com/tu-usuario/uno
     dates: 2025 – Presente
-    description: Qué hace y qué problema resuelve.
-    tech: Python, PostgreSQL, Docker
+    description: Qué hace y qué problema resuelve (una frase).
+    bullets:            # opcional: varios logros con sus cifras
+      - "Logro del proyecto, con su cifra real."
+    tech: Herramienta A, Herramienta B
 education:
-  - title: Ingeniería de Sistemas (8.º semestre)
-    org: Universidad Ejemplo
+  - title: Título del estudio (semestre o año)
+    org: Institución
     year: "2026"
 certifications:
-  - title: Nombre del certificado
+  - title: Certificación Ejemplo
     org: Entidad
     year: "2025"
 ```
@@ -191,8 +221,28 @@ certifications:
 - Máximo `cv.max_experiences` roles y `cv.max_projects` proyectos, con
   `cv.bullets_per_role` bullets cada uno. Perfil junior: usa lo que haya, sin
   rellenar con ítems irrelevantes.
+- Cada bullet sigue el patrón "logro + acción" de `cv.md` y conserva sus cifras,
+  volúmenes, alcance y detalles concretos (A3). No reduzcas un ítem fuerte a una
+  línea genérica; en el más relevante, pon primero sus 2–3 logros más
+  verificables.
+- En `projects[]` usa `bullets: []` para varios logros y `description` para una
+  sola frase. `tech` va en su línea y no se repite dentro de los bullets; los
+  payloads antiguos con solo `description` siguen valiendo (A4).
+- `skills[]` agrupa por categorías que salgan de `cv.md` o que deduzcas del área
+  y de la oferta: no hay categorías predefinidas. Máximo 4 líneas, categoría en
+  `lang`, y solo competencias respaldadas por un ítem incluido (A5).
+- Contribuciones externas (open source, voluntariado, publicaciones, ponencias,
+  trabajo pro bono) van en su sección natural con `url` y su estado real
+  ("mergeado", "publicado"). Describe su tamaño real: una contribución es una
+  contribución, no "contribuciones" (A6).
+- Cada ítem lleva `url` si `cv.md` la tiene. Lo que sigue en curso lleva
+  "Presente" (o su equivalente en `lang`), no solo el año de inicio, con el
+  mismo formato de fechas en todo el CV (A7).
+- Si dudas de que un dato esté respaldado, no lo pongas en el YAML: repórtalo en
+  el chat como `[VERIFICAR] …` con el ítem afectado. `[VERIFICAR]` nunca aparece
+  en el CV, HTML ni PDF (A8).
 - Cada bullet sale de `cv.md`. Reformula para el puesto; nunca inventes métricas,
-  herramientas ni empresas.
+  herramientas ni empresas. Cita los valores con `"…"` si llevan `#` o `:`.
 - Omite `awards` e `interests` salvo que la oferta los pida.
 - Sin tabulaciones, dos espacios por nivel.
 
@@ -212,9 +262,11 @@ node generate-pdf.mjs output/cv-{empresa-slug}.html output/cv-{empresa-slug}.pdf
   o campo obligatorio ausente: corrige el YAML, nunca el HTML.
 - `validate-extra.mjs` comprueba sin LLM: links de `profile.yml` presentes,
   `entry` con `experience` vacío, proyectos sin cargo/empresa/ubicación,
-  competencias respaldadas, cifras y nombres propios que existan en `cv.md`,
-  orden por relevancia y certificaciones relevantes incluidas. Si falla,
-  corrige el YAML y repite (máx. 2). Nunca edites el HTML.
+  competencias y `skills[]` respaldadas, trazabilidad por ítem (`tech`,
+  competencias y nombres propios en el MISMO ítem de `cv.md`), cifras en ese
+  ítem, ausencia de `[VERIFICAR]`, "Presente" en lo que sigue en curso, orden
+  por relevancia y certificaciones relevantes incluidas. Si falla, corrige el
+  YAML y repite (máx. 2). Nunca edites el HTML.
 - `--skip-fact-check` solo si `language.output` != `en`: el gate de redacción
   cubre solo inglés y avisa de que no comprobó nada. Con `en`, quítalo.
 - `verify-cv-structure.mjs`: `✅` esperado; `UNVERIFIED` = las empresas del
@@ -224,17 +276,37 @@ node generate-pdf.mjs output/cv-{empresa-slug}.html output/cv-{empresa-slug}.pdf
   débil. Nunca quitar: links del encabezado, educación, certificaciones relevantes.
 - Nada de `--allow-reorder` ni `--allow-nonchronological`.
 
-Cierra en 3 líneas: PDF, score y brechas para la entrevista.
+Cierra en 3 líneas: PDF, score y brechas para la entrevista. En las brechas van
+TODOS los requisitos de la oferta que `cv.md` no prueba, cada uno marcado como
+requisito o valorado y separados por `;` en una sola línea (A9). Si generaste con
+el score bajo el umbral a petición del usuario, esa línea empieza con
+`⚠ Score X.X/5, por debajo del umbral Y. Generado a petición tuya. Brechas para
+la entrevista: …` (solo en el chat; nunca en el CV, HTML, YAML ni PDF).
 
 ---
 
-## Paso 3B — Score < umbral → descartar
+## Paso 3B — Score < umbral
 
-Dos líneas, sin PDF ni HTML. Recomienda no aplicar.
+Por defecto (`below_threshold: ask`), si el usuario no lo ha pedido: nada de PDF
+ni HTML. Una línea en `language.output`:
+
+```
+Score X.X/5, bajo el umbral Y. Di 'genera igual' si quieres el CV.
+```
+
+- Si pide el CV ("genera igual", "fuerza", `--force` o su equivalente) o el
+  perfil trae `below_threshold: force` → 3A completo, sin discutir la regla, con
+  el aviso de cierre de B2.
+- `below_threshold: discard` → dos líneas, sin ofrecer:
 
 ```
 Descartada — {Empresa} · {Puesto}: score X.X/5. Brecha principal: {una}.
 ```
+
+- `min_score > 0` y score menor: pregunta UNA vez
+  `Score X.X/5 está por debajo de tu mínimo (Z). ¿Confirmas?`. Sin confirmación
+  no generes; con ella, 3A y estado `Forced`.
+- Una petición explícita del usuario prevalece sobre `discard`.
 
 ---
 
@@ -244,22 +316,30 @@ Añade **una línea al final** de `data/applications.md`; nunca reordenes ni
 reescribas las existentes.
 
 ```
-| 2026-11-16 | Empresa Ejemplo | Analista de Datos | 4.3 | Evaluated | output/cv-empresa-ejemplo.pdf |
+| 2026-11-16 | Empresa Ejemplo | Puesto Ejemplo | 4.3 | Evaluated | output/cv-empresa-ejemplo.pdf |
+| 2026-11-16 | Empresa Ejemplo | Puesto Ejemplo | 3.2 | Forced | output/cv-empresa-ejemplo.pdf |
 ```
 
 Columnas: `fecha | empresa | puesto | score o — | estado | pdf o —`.
-Estados: `Evaluated`, `Applied`, `Interview`, `Offer`, `Rejected`, `Discarded`.
-Tú solo escribes `Evaluated` al evaluar y `Discarded` al descartar.
+Estados: `Evaluated`, `Applied`, `Interview`, `Offer`, `Rejected`, `Discarded`,
+`Forced`.
+Tú solo escribes `Evaluated` al evaluar, `Forced` al generar bajo el umbral
+(con el score REAL, sin ocultarlo ni redondearlo) y `Discarded` al descartar.
 
 ---
 
 ## Reglas duras
 
 1. **Nunca envíes, publiques ni rellenes un formulario.** Preparas; el usuario envía.
-2. **Score < umbral → nunca generes PDF.**
+2. **Score < `scoring.apply_threshold` sin petición del usuario → nunca generes
+   PDF.** Ofrécelo en una línea (Paso 3B). `force`, una petición explícita o
+   `scoring.below_threshold: force` sí lo generan, con el aviso de B2 y estado
+   `Forced`; `min_score` puede pedir una confirmación.
 3. **Un CV = una página.** Sin excepciones.
 4. **Nunca escribas HTML a mano.** Siempre `build-cv.mjs`.
-5. **Nunca inventes** métrica, empresa, fecha, título ni tecnología.
+5. **Nunca inventes** métrica, empresa, fecha, título ni tecnología. Una
+   herramienta o práctica solo se atribuye al ítem de `cv.md` que la respalda; si
+   dudas, `[VERIFICAR]` en el chat, nunca en el CV.
 6. Una oferta, una evaluación. No agrupes.
 7. Responde en `language.output` (por defecto `es`).
 8. Lee `cv.md` **una vez** por evaluación y no lo reabras: ya está en contexto.
@@ -271,6 +351,7 @@ Tú solo escribes `Evaluated` al evaluar y `Discarded` al descartar.
 | Necesitas | Comando |
 |---|---|
 | Extraer oferta | `node extract-jd.mjs <url>` |
+| Decidir el corte | `node threshold.mjs --score X.X [--requested]` |
 | Generar HTML | `node build-cv.mjs data/x.yml output/x.html` |
 | Validar payload | `node validate-extra.mjs data/x.yml jds/y.md` |
 | Validar estructura | `node verify-cv-structure.mjs output/x.payload.json` |

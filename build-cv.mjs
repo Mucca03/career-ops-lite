@@ -189,17 +189,21 @@ function projectsHtml(entries) {
     const name = escapeHtml(pick(entry, 'name', 'nombre') ?? '');
     const url = str(pick(entry, 'url'));
     const dates = str(pick(entry, 'dates', 'period', 'fechas', 'year', 'anio', 'año'));
-    const description = escapeHtml(
-      pick(entry, 'description', 'descripcion')
-      ?? list(pick(entry, 'bullets', 'logros') ?? []).join(' '),
-    );
+    // `description` es la alternativa de una frase; `bullets` conserva varios
+    // logros con sus cifras. Si vienen los dos, la descripción es el contexto y
+    // los bullets van debajo. Los payloads antiguos solo traen `description`.
+    const description = escapeHtml(pick(entry, 'description', 'descripcion') ?? '');
+    const bullets = list(pick(entry, 'bullets', 'logros', 'achievements') ?? []);
     const tech = escapeHtml(pick(entry, 'tech', 'tecnologias', 'stack') ?? '');
     // Un enlace sin esquema seguro no se emite como <a href="">.
     const href = safeHref(absoluteUrl(url));
     const title = href ? `<a href="${escapeHtml(href)}">${name}</a>` : name;
     const when = dates ? ` <span class="project-date">${escapeHtml(dates)}</span>` : '';
+    const bulletsHtml = bullets.length
+      ? `\n    <ul>\n${bullets.map((bullet) => `      <li>${escapeHtml(bullet)}</li>`).join('\n')}\n    </ul>`
+      : '';
     return `<div class="project">
-    <div class="project-title">${title}${when}</div>${description ? `\n    <div class="project-desc">${description}</div>` : ''}${tech ? `\n    <div class="project-tech">${tech}</div>` : ''}
+    <div class="project-title">${title}${when}</div>${description ? `\n    <div class="project-desc">${description}</div>` : ''}${bulletsHtml}${tech ? `\n    <div class="project-tech">${tech}</div>` : ''}
   </div>`;
   }).join('\n  ');
 }
@@ -221,15 +225,18 @@ function educationHtml(entries) {
   }).join('\n  ');
 }
 
-function certificationsHtml(entries, orgClass, yearClass, itemClass, titleClass) {
+function certificationsHtml(entries, classes) {
   return list(entries).map((entry) => {
     const title = escapeHtml(pick(entry, 'title', 'name', 'nombre') ?? '');
     const org = escapeHtml(pick(entry, 'org', 'issuer', 'entidad') ?? '');
     const year = escapeHtml(pick(entry, 'year', 'date', 'fecha', 'anio', 'año') ?? '');
-    return `<div class="${itemClass}">
-      <span class="${titleClass}">${title}</span>
-      <span class="${orgClass}">${org}</span>
-      <span class="${yearClass}">${year}</span>
+    // Una fila por certificación: nombre + emisor a la izquierda, año a la
+    // derecha. Si falta el emisor o el año no se emite su celda: nada de
+    // separadores vacíos ni "|  |".
+    const orgHtml = org ? `<span class="${classes.org}">${org}</span>` : '';
+    const yearHtml = year ? `<span class="${classes.year}">${year}</span>` : '';
+    return `<div class="${classes.item}">
+      <span class="${classes.main}"><span class="${classes.title}">${title}</span>${orgHtml}</span>${yearHtml}
     </div>`;
   }).join('\n    ');
 }
@@ -247,7 +254,7 @@ function skillsHtml(categories) {
   }).filter((c) => c.items.length > 0);
   if (kept.length === 0) return '';
   const items = kept.map((c) => {
-    const cat = c.category ? `<span class="skill-category">${escapeHtml(c.category)}:</span> ` : '';
+    const cat = c.category ? `<strong class="skill-category">${escapeHtml(c.category)}:</strong> ` : '';
     return `    <div class="skill-item">${cat}${escapeHtml(list(c.items).join(', '))}</div>`;
   }).join('\n');
   return `<div class="skills-grid">\n${items}\n  </div>`;
@@ -305,8 +312,12 @@ function render(cv) {
     EXPERIENCE: experienceHtml(cv.experience),
     PROJECTS: projectsHtml(cv.projects),
     EDUCATION: educationHtml(cv.education),
-    CERTIFICATIONS: certificationsHtml(cv.certifications, 'cert-org', 'cert-year', 'cert-item', 'cert-title'),
-    AWARDS: certificationsHtml(cv.awards, 'award-org', 'award-year', 'award-item', 'award-title'),
+    CERTIFICATIONS: certificationsHtml(cv.certifications, {
+      item: 'cert-item', main: 'cert-main', title: 'cert-title', org: 'cert-org', year: 'cert-year',
+    }),
+    AWARDS: certificationsHtml(cv.awards, {
+      item: 'award-item', main: 'award-main', title: 'award-title', org: 'award-org', year: 'award-year',
+    }),
     INTERESTS: cv.interests.map((i, idx) => escapeHtml(idx === 0 ? i : i.charAt(0).toLowerCase() + i.slice(1))).join(', '),
     SKILLS: skillsHtml(cv.skills),
   };

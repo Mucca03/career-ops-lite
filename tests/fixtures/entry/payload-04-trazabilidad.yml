@@ -1,0 +1,62 @@
+lang: es
+name: Nombre Apellido
+title: Desarrollador Junior · Automatización
+email: persona@example.com
+phone: "+57 300 111 2233"
+location: Bogotá, Colombia
+linkedin: linkedin.com/in/persona-ejemplo
+github: github.com/persona-ejemplo
+portfolio: blog.example.com
+links:
+  - label: Copr
+    url: https://copr.example.org/persona
+summary: >
+  Estudiante de Ingeniería de Sistemas con una CLI de respaldos en Linux y una
+  contribución mergeada en open source.
+competencies:
+  - Python
+  - Linux
+skills:
+  - category: Lenguajes
+    items: [Python, Bash, Java]
+  - category: Sistemas
+    items: [Linux, Docker]
+  - category: Contribución
+    items: [C++, D-Bus]
+experience: []
+projects:
+  - name: CLI de Respaldos
+    url: github.com/persona-ejemplo/respaldos
+    dates: 2026
+    description: Herramienta de línea de comandos para respaldos diarios.
+    bullets:
+      - Automaticé el respaldo diario en Linux con un script en Bash y una cuarentena reversible.
+    tech: Python, Bash, Linux
+  - name: Panel de Inventario
+    url: github.com/persona-ejemplo/panel
+    dates: 2025 – Presente
+    bullets:
+      - Reduje el tiempo de carga de 8 s a 2 s al añadir índices en PostgreSQL.
+      - Ejecuté 24 pruebas unitarias en GitHub Actions.
+    tech: Python, FastAPI, PostgreSQL, Docker
+  - name: motor-tareas
+    url: github.com/persona-ejemplo/motor-tareas
+    dates: 2026
+    bullets:
+      - "PR #42 mergeado: notificaciones nativas por D-Bus y permisos Flatpak documentados."
+    tech: C++, D-Bus, Flatpak
+  - name: Motor de Reglas
+    dates: 2024
+    description: Motor de inferencia por encadenamiento hacia adelante en Java.
+    tech: Java, Swing
+education:
+  - title: Ingeniería de Sistemas (8.º semestre)
+    org: Universidad Ejemplo
+    year: "2026"
+certifications:
+  - title: Linux Essentials
+    org: Linux Foundation
+    year: "2024"
+  - title: Python for Everybody
+    org: Universidad Ejemplo
+    year: "2025"

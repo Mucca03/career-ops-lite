@@ -8,11 +8,13 @@ Un flujo, lineal. Sin plugins, sin servicios externos:
 
 ```
 oferta (URL o texto)  →  score 0–5  →  ≥ umbral: CV de 1 página en PDF
-                                    →  < umbral: descarte en 2 líneas
+                                    →  < umbral: se ofrece el CV (sin PDF)
 ```
 
 El umbral es **4.0** si tienes experiencia y **3.5** si eres estudiante o junior
 (se calibra mirando el tracker: lo que llegó a entrevista frente a lo aplicado).
+Bajo el umbral puedes pedir el CV igualmente: `scoring.below_threshold` decide si
+se ofrece (`ask`), se genera siempre (`force`) o se descarta (`discard`).
 
 ## Por qué
 

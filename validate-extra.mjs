@@ -5,8 +5,8 @@
  * Existe porque un modelo pequeño (7B-9B) inventa con seguridad: añade una
  * métrica que suena bien, convierte un proyecto en un puesto de trabajo o lista
  * una tecnología que nunca usó. Un juez probabilístico no lo detecta de forma
- * fiable; estas ocho comprobaciones sí, y son idioma-agnósticas (comparan
- * texto normalizado, sin diccionarios de inglés).
+ * fiable; estas comprobaciones sí, y son idioma-agnósticas (comparan texto
+ * normalizado, sin diccionarios de inglés).
  *
  * Uso:
  *   node validate-extra.mjs <payload.yml> [<oferta.md>]
@@ -330,6 +330,60 @@ function overlap(a, b) {
   return hits / left.size;
 }
 
+// ── trazabilidad por ítem ───────────────────────────────────────────────────
+// Una tecnología o un nombre solo cuenta si está en el ítem de cv.md que le
+// corresponde, no en cualquier parte del CV. El emparejamiento es por título
+// (empresa o nombre del proyecto) y, si no hay coincidencia literal, por
+// solapamiento de términos.
+
+const EXPERIENCE_NAME_KEYS = ['company', 'empresa', 'org', 'role', 'title', 'puesto', 'cargo'];
+const PROJECT_NAME_KEYS = ['name', 'nombre'];
+
+function findCvItem(name, items) {
+  const needle = fold(name);
+  if (!needle) return null;
+  let best = null;
+  let bestScore = 0;
+  for (const item of items) {
+    const title = fold(item.title);
+    // "Empresa Datos" dentro de "Empresa Datos — Bogotá" es la coincidencia
+    // fuerte; el solapamiento solo se usa cuando el título no la contiene.
+    const score = title && (title.includes(needle) || needle.includes(title))
+      ? 1
+      : Math.max(overlap(name, item.title), overlap(item.title, name));
+    if (score > bestScore) {
+      best = item;
+      bestScore = score;
+    }
+  }
+  return bestScore >= 0.6 ? best : null;
+}
+
+/** "Python, FastAPI / Docker" → ["Python", "FastAPI", "Docker"]. */
+function splitTech(value) {
+  return str(value).split(/[;,/·|]+/).map((part) => part.trim()).filter(Boolean);
+}
+
+/** Cifras de un texto, con las mismas variantes que la comparación global. */
+function numbersOf(text) {
+  const set = new Set();
+  for (const match of joinDigitGroups(text).matchAll(/\d[\d.,]*/g)) addNumberVariants(set, match[0]);
+  const folded = fold(text);
+  for (const [word, number] of WORD_NUMBERS) {
+    if (mentions(folded, word)) addNumberVariants(set, String(number));
+  }
+  return set;
+}
+
+// "Presente" y sus equivalentes. El CV en curso no puede quedar con el solo año
+// de inicio: en la entrevista parece un puesto terminado.
+const ONGOING = {
+  es: /\b(presente|actualidad|actual|hoy|en curso|cursando)\b/,
+  en: /\b(present|current|ongoing|now)\b/,
+  pt: /\b(presente|atual|atualidade|em curso|cursando|andamento)\b/,
+};
+const anyOngoing = (text) => /\b(presente|present|actual|current|atual|ongoing|cursando|andamento)\b/.test(fold(text));
+
 // ── validación ──────────────────────────────────────────────────────────────
 
 const PROJECT_FORBIDDEN = [
@@ -408,25 +462,65 @@ function validate(payload, profile, cvText, jdText) {
     }
   });
 
-  // ── 4. competencias respaldadas por un ítem incluido ──────────────────────
+  // ── 4. trazabilidad por ítem contra cv.md ─────────────────────────────────
+  // Cada ítem del payload se empareja con su ítem de cv.md (empresa o nombre
+  // del proyecto). Lo que se atribuya a ese ítem —tech, cifras, nombres— debe
+  // estar en SU texto de cv.md, no en cualquier parte del CV.
+  const cvExperienceItems = cvSectionsBy(cv, 'experience').flatMap((s) => s.items);
+  const cvProjectItems = cvSectionsBy(cv, 'projects').flatMap((s) => s.items);
+  const cvEducation = cvSectionsBy(cv, 'education').flatMap((s) => s.items);
+
+  const experienceEntries = experience.map((item, index) => {
+    const name = str(pick(item, ...EXPERIENCE_NAME_KEYS));
+    return { kind: 'experience', index, item, name, cvItem: findCvItem(name, cvExperienceItems) };
+  });
+  const projectEntries = projects.map((item, index) => {
+    const name = str(pick(item, ...PROJECT_NAME_KEYS));
+    return { kind: 'projects', index, item, name, cvItem: findCvItem(name, cvProjectItems) };
+  });
+  const includedEntries = [...experienceEntries, ...projectEntries];
+
+  for (const entry of includedEntries) {
+    if (!entry.cvItem) {
+      fail('trazabilidad', `${entry.kind}[${entry.index}]: «${entry.name || '(sin nombre)'}» `
+        + 'no aparece como ítem en cv.md');
+      continue;
+    }
+    for (const part of splitTech(pick(entry.item, 'tech', 'stack', 'tecnologias'))) {
+      if (!mentions(fold(entry.cvItem.text), part)) {
+        fail('trazabilidad', `${entry.kind}[${entry.index}]: «${part}» no aparece `
+          + `en el mismo ítem de cv.md («${entry.cvItem.title}»)`);
+      }
+    }
+  }
+
+  // ── 5. competencias respaldadas por un ítem incluido ──────────────────────
   const includedText = [...experience, ...projects].map(itemText).join('\n');
   const includedFold = fold(includedText);
+  const includedCvFold = fold(includedEntries.map((entry) => entry.cvItem?.text ?? '').join('\n'));
   const competencies = list(payload.competencies);
-  for (const competency of competencies) {
+  const skillItems = list(payload.skills).flatMap((group) => (
+    typeof group === 'string'
+      ? [group]
+      : list(pick(group, 'items', 'skills', 'habilidades'))
+  ));
+  for (const competency of [...competencies, ...skillItems]) {
     const parts = competencyParts(competency);
     const missing = parts.filter((part) => !competencyBacked(includedFold, part));
     if (missing.length) {
       fail('competencias', `sin respaldo en ningún bullet ni stack incluido: ${competency}`
         + (missing.length < parts.length ? ` (falta «${missing.join('», «')}»)` : ''));
+      continue;
+    }
+    const missingCv = parts.filter((part) => !competencyBacked(includedCvFold, part));
+    if (missingCv.length) {
+      fail('trazabilidad', `competencia sin respaldo en el ítem de cv.md: ${competency}`
+        + (missingCv.length < parts.length ? ` (falta «${missingCv.join('», «')}»)` : ''));
     }
   }
 
-  // ── 5. cifras y nombres propios de los bullets ────────────────────────────
-  const cvNumbers = new Set();
-  for (const match of joinDigitGroups(cvText).matchAll(/\d[\d.,]*/g)) addNumberVariants(cvNumbers, match[0]);
-  for (const [word, number] of WORD_NUMBERS) {
-    if (mentions(cvFold, word)) addNumberVariants(cvNumbers, String(number));
-  }
+  // ── 6. cifras y nombres propios, en el ítem que les toca ──────────────────
+  const cvNumbers = numbersOf(cvText);
 
   const reported = new Set();
   const report = (check, detail) => {
@@ -436,27 +530,28 @@ function validate(payload, profile, cvText, jdText) {
     fail(check, detail);
   };
 
-  const bulletSources = [
-    ...experience.flatMap((item, index) => [
-      ...list(pick(item, 'bullets', 'logros') ?? []).map((bullet) => ({ where: `experience[${index}]`, bullet })),
-      { where: `experience[${index}].description`, bullet: pick(item, 'description', 'descripcion') ?? '' },
-    ]),
-    ...projects.flatMap((item, index) => [
-      ...list(pick(item, 'bullets', 'logros') ?? []).map((bullet) => ({ where: `projects[${index}]`, bullet })),
-      { where: `projects[${index}].description`, bullet: pick(item, 'description', 'descripcion') ?? '' },
-    ]),
-  ].filter((source) => str(source.bullet));
+  const bulletSources = includedEntries.flatMap(({ kind, index, item, cvItem }) => {
+    const where = `${kind}[${index}]`;
+    return [
+      ...list(pick(item, 'bullets', 'logros', 'achievements') ?? [])
+        .map((bullet) => ({ where, bullet, cvItem })),
+      { where: `${where}.description`, bullet: pick(item, 'description', 'descripcion') ?? '', cvItem },
+    ];
+  }).filter((source) => str(source.bullet));
 
-  for (const { where, bullet } of bulletSources) {
+  for (const { where, bullet, cvItem } of bulletSources) {
+    const haystack = cvItem?.text ?? cvText;
+    const haystackFold = fold(haystack);
+    const numbers = cvItem ? numbersOf(cvItem.text) : cvNumbers;
     for (const match of joinDigitGroups(bullet).matchAll(/\d[\d.,]*/g)) {
       const found = new Set();
       addNumberVariants(found, match[0]);
-      if (![...found].some((variant) => cvNumbers.has(variant))) {
-        report('cifras', `${where}: la cifra ${match[0]} no aparece en cv.md`);
+      if (![...found].some((variant) => numbers.has(variant))) {
+        report('cifras', `${where}: la cifra ${match[0]} no aparece en el mismo ítem de cv.md`);
       }
     }
     // Nombres propios: se omiten la primera palabra de cada frase (el verbo) y
-    // los términos vacíos; el resto debe existir literalmente en cv.md.
+    // los términos vacíos; el resto debe existir en el ítem de cv.md.
     for (const sentence of String(bullet).split(/(?<=[.:;])\s+/)) {
       const words = sentence.split(/\s+/).filter(Boolean);
       words.forEach((word, index) => {
@@ -465,14 +560,37 @@ function validate(payload, profile, cvText, jdText) {
         const folded = fold(clean);
         if (index === 0 || folded.length < 3 || STOPWORDS.has(folded) || MONTHS.has(folded)) return;
         if (/^\d/.test(folded)) return;
-        if (!mentions(cvFold, folded)) {
-          report('nombres', `${where}: «${clean}» no aparece en cv.md`);
+        if (!mentions(haystackFold, folded)) {
+          report('nombres', `${where}: «${clean}» no aparece en el mismo ítem de cv.md`);
         }
       });
     }
   }
 
-  // ── 6. el resumen no introduce tecnología propia ──────────────────────────
+  // ── 7. marcadores internos y fechas en curso ──────────────────────────────
+  if (/\[\s*verificar\s*\]/i.test(JSON.stringify(payload))) {
+    fail('marcadores', '[VERIFICAR] está en el payload: va en el chat, nunca en el CV');
+  }
+
+  const lang = (fold(pick(payload, 'lang', 'idioma') ?? pick(profile.language, 'output') ?? 'es').slice(0, 2)) || 'es';
+  const ongoing = ONGOING[lang] ?? ONGOING.es;
+  const educationEntries = list(payload.education).map((item, index) => ({
+    kind: 'education',
+    index,
+    item,
+    name: str(pick(item, 'title', 'degree', 'titulo', 'carrera')),
+    cvItem: findCvItem(str(pick(item, 'title', 'degree', 'titulo', 'carrera')), cvEducation),
+  }));
+  for (const entry of [...includedEntries, ...educationEntries]) {
+    if (!entry.cvItem || !anyOngoing(entry.cvItem.text)) continue;
+    const dates = str(pick(entry.item, 'dates', 'period', 'fechas', 'year', 'anio', 'año'));
+    if (!ongoing.test(fold(dates))) {
+      fail('fechas', `${entry.kind}[${entry.index}]: sigue en curso en cv.md; `
+        + `usa "Presente" (o su equivalente en ${lang}), no solo el año de inicio`);
+    }
+  }
+
+  // ── 8. el resumen no introduce tecnología propia ──────────────────────────
   const summary = str(pick(payload, 'summary', 'resumen', 'perfil'));
   if (summary) {
     for (const sentence of summary.split(/(?<=[.:;])\s+/)) {
@@ -489,7 +607,7 @@ function validate(payload, profile, cvText, jdText) {
     }
   }
 
-  // ── 7 y 8. relevancia (solo con oferta) ───────────────────────────────────
+  // ── 9 y 10. relevancia (solo con oferta) ──────────────────────────────────
   const jdTerms = jdText ? termSet(jdText) : null;
   if (jdTerms && jdTerms.size > 0) {
     for (const [label, items] of [['projects', projects], ['experience', experience]]) {
@@ -560,9 +678,10 @@ Opciones:
   --help
 
 Comprueba sin LLM: links del perfil y campos de contacto, modo del CV
-(entry/experienced/mixed), proyectos sin cargo/empresa/ubicación, competencias
-respaldadas, cifras y nombres propios que existan en cv.md, y —si se pasa la
-oferta— orden por relevancia y certificaciones relevantes incluidas.
+(entry/experienced/mixed), proyectos sin cargo/empresa/ubicación, competencias y
+skills respaldadas, trazabilidad por ítem (tech, nombres y cifras en el mismo
+ítem de cv.md), [VERIFICAR] fuera del CV, fechas en curso con "Presente", y —si
+se pasa la oferta— orden por relevancia y certificaciones relevantes incluidas.
 Exit 1 si algo falla: corrige el YAML, nunca el HTML.`;
 
 function main() {

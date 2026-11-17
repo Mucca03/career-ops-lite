@@ -13,8 +13,8 @@ Sigue `AGENTS.md` al pie de la letra. Es el flujo completo:
    (CV, links, etapa, graduación, ciudad y modalidad, salario, idioma).
 1. Extrae la oferta con `node extract-jd.mjs` (o `--text` si la pegas).
 2. Puntúa de 0 a 5 con el bloque de salida fijo del Paso 2.
-3. Score ≥ `scoring.apply_threshold` → `build-cv.mjs` → `validate-extra.mjs`
-   → `verify-cv-structure.mjs` (solo si hay experiencia)
-   → `generate-pdf.mjs --max-pages=1 --strict-pages`.
-   Score menor → descarte en dos líneas, sin PDF.
+3. `node threshold.mjs --score X.X` decide el corte. Si genera →
+   `build-cv.mjs` → `validate-extra.mjs` → `verify-cv-structure.mjs` (solo si
+   hay experiencia) → `generate-pdf.mjs --max-pages=1 --strict-pages`.
+   Bajo el umbral y sin petición, ofrece el CV en una línea (sin PDF).
 4. Añade una línea al final de `data/applications.md`.

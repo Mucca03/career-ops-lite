@@ -88,6 +88,9 @@
   /* === HEADER === */
   .header {
     margin-bottom: 20px;
+    /* Un enlace largo (una URL de portafolio, un correo) no puede invadir el
+       comienzo del resumen ni salirse del bloque. */
+    overflow: hidden;
   }
 
   .header h1 {
@@ -131,6 +134,10 @@
   .contact-row a {
     color: #555;
     text-decoration: none;
+    /* Una URL de contacto más larga que la línea se parte en lugar de
+       desbordar el encabezado. */
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   /* The separator is generated content on the item BEFORE it, not an element of
@@ -236,12 +243,17 @@
     font-size: 12.5px;
     font-weight: 600;
     color: var(--secondary-color);
+    /* La columna izquierda puede encogerse y partir el nombre; la derecha nunca
+       se apila debajo de las fechas. */
+    min-width: 0;
+    overflow-wrap: break-word;
   }
 
   .job-period {
     font-size: 10.5px;
     color: #777;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .job-role {
@@ -295,6 +307,8 @@
   .project-title a {
     color: inherit;
     text-decoration: none;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .project-title a:hover {
@@ -316,6 +330,18 @@
     color: #444;
     margin-top: 3px;
     line-height: 1.55;
+  }
+
+  .project ul {
+    padding-left: 18px;
+    margin-top: 4px;
+  }
+
+  .project li {
+    font-size: 10.5px;
+    line-height: 1.55;
+    color: #333;
+    margin-bottom: 3px;
   }
 
   .project-date {
@@ -347,6 +373,8 @@
     font-weight: 600;
     font-size: var(--font-size);
     color: #333;
+    min-width: 0;
+    overflow-wrap: break-word;
   }
 
   .edu-org {
@@ -358,6 +386,7 @@
     font-size: 10px;
     color: #777;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .edu-location {
@@ -373,19 +402,25 @@
   }
 
   /* === CERTIFICATIONS === */
+  /* Una fila flex por certificación: nombre + emisor a la izquierda, año a la
+     derecha. La tabla anterior agrupaba los títulos arriba y apilaba emisores y
+     años abajo cuando alguno faltaba. */
   .cert-table {
-    display: table;
     width: 100%;
   }
 
   .cert-item {
-    display: table-row;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding-bottom: 6px;
   }
 
-  .cert-item > * {
-    display: table-cell;
-    vertical-align: baseline;
-    padding-bottom: 6px;
+  .cert-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: break-word;
   }
 
   .cert-title {
@@ -396,34 +431,42 @@
 
   .cert-org {
     color: var(--secondary-color);
-    white-space: nowrap;
+  }
+
+  /* El guion solo existe si hay emisor: sin emisor no queda un separador solo. */
+  .cert-org::before {
+    content: " — ";
+    color: #999;
   }
 
   .cert-year {
     font-size: 10px;
     color: #777;
     white-space: nowrap;
+    flex-shrink: 0;
     text-align: right;
-    width: 44px;
   }
 
   /* === AWARDS === */
-  /* Same table model as certifications (title / issuer / year on one baseline),
-     under its own class names so a template pack can restyle awards without
-     dragging certifications along. */
+  /* Same flex row model as certifications (title / issuer / year on one
+     baseline), under its own class names so a template pack can restyle awards
+     without dragging certifications along. */
   .award-table {
-    display: table;
     width: 100%;
   }
 
   .award-item {
-    display: table-row;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding-bottom: 6px;
   }
 
-  .award-item > * {
-    display: table-cell;
-    vertical-align: baseline;
-    padding-bottom: 6px;
+  .award-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: break-word;
   }
 
   .award-title {
@@ -434,15 +477,19 @@
 
   .award-org {
     color: var(--secondary-color);
-    white-space: nowrap;
+  }
+
+  .award-org::before {
+    content: " — ";
+    color: #999;
   }
 
   .award-year {
     font-size: 10px;
     color: #777;
     white-space: nowrap;
+    flex-shrink: 0;
     text-align: right;
-    width: 44px;
   }
 
   /* === INTERESTS === */
@@ -468,15 +515,21 @@
   .cv-consent:empty { display: none; }
 
   /* === SKILLS === */
+  /* Una línea por categoría, como la lista de competencias técnicas: el flex
+     con wrap anterior mezclaba categorías en la misma línea. */
   .skills-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 14px;
+    display: block;
   }
 
   .skill-item {
     font-size: 10.5px;
     color: #444;
+    line-height: 1.45;
+    margin-bottom: 2px;
+  }
+
+  .skill-item:last-child {
+    margin-bottom: 0;
   }
 
   .skill-category {

@@ -1,0 +1,58 @@
+lang: es
+format: letter
+name: Nombre Apellido
+title: Puesto Objetivo
+email: persona@example.com
+phone: "+57 300 111 2233"
+location: Ciudad, País
+linkedin: linkedin.com/in/persona-ejemplo
+github: github.com/persona-ejemplo
+portfolio: https://portafolio.example.com/una-ruta-extraordinariamente-larga/que-deberia-partirse
+links:
+  - label: Portafolio
+    url: https://otro.example.com/ruta/igual-de-larga/para-probar-el-encabezado
+summary: >
+  Dos líneas de resumen para comprobar que el encabezado no invade la sección
+  siguiente cuando los enlaces son largos.
+competencies: [Herramienta A]
+skills:
+  - category: Categoría 1
+    items: [Herramienta A, Herramienta B]
+  - category: Categoría 2
+    items: [Método C]
+  - category: Categoría 3
+    items: [Certificación D]
+experience:
+  - company: Empresa Ejemplo
+    role: Puesto Ejemplo
+    dates: 2021 — 2025
+    bullets:
+      - "Logro uno con su cifra real."
+  - company: Empresa Anterior
+    role: Puesto Anterior
+    dates: 2019 — 2021
+    bullets:
+      - "Logro dos con su cifra real."
+projects:
+  - name: Proyecto con un nombre razonablemente largo
+    url: https://github.com/persona-ejemplo/proyecto-con-un-nombre-muy-largo-para-probar-el-salto
+    dates: 2025 – Presente
+    bullets:
+      - "Logro del proyecto con su cifra real."
+    tech: Herramienta A, Herramienta B
+education:
+  - title: Título del primer estudio
+    org: Institución Uno
+    year: "2026"
+  - title: Título del segundo estudio
+    org: Institución Dos
+    year: "2024"
+certifications:
+  - title: Certificación Ejemplo Uno
+    org: Entidad Uno
+    year: "2025"
+  - title: Certificación Ejemplo Dos
+    org: Entidad Dos
+    year: "2024"
+  - title: Certificación Sin Emisor
+    year: "2023"
