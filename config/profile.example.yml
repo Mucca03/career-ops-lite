@@ -52,10 +52,9 @@ scoring:
   min_score: 0               # > 0: si el score queda por debajo, pide confirmación una vez
 
 # Presentación del PDF. Todos los valores son opcionales: sin este bloque se
-# usan los del template. Se inyectan como variables CSS en el render.
+# usan los del template. Se inyectan como variables CSS en el render. El CV es
+# monocromático: no hay colores que configurar.
 style:
-  accent_color: "#1d4ed8"
-  secondary_color: "#111827"
   font_family: "Outfit, Inter, sans-serif"
   font_size: "10pt"
   margin: "0.5in"

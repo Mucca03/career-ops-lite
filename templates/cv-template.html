@@ -7,13 +7,9 @@
 <style>
   /* Themeable tokens (#1837): overridable via config/profile.yml `style:`, which
      the PDF pipeline injects as a later :root block. Defaults below reproduce the
-     original hardcoded values, so a profile without a `style:` block is unchanged. */
+     original hardcoded values, so a profile without a `style:` block is unchanged.
+     La paleta es monocromática: cualquier perfil hereda negro y reglas finas. */
   :root {
-    --accent-color: hsl(187 74% 32%);
-    --secondary-color: hsl(270, 70%, 45%);
-    --tag-color: hsl(187, 74%, 28%);
-    --tag-bg: hsl(187, 40%, 95%);
-    --tag-border: hsl(187, 40%, 88%);
     --font-family: "Liberation Sans", 'Helvetica Neue', Arial, 'DejaVu Sans', 'Arial Unicode MS', sans-serif;
     --font-size: 11px;
     /* Matches generate-pdf.mjs's PDF_PAGE_MARGIN — the actual PDF page margin
@@ -69,7 +65,7 @@
     font-family: var(--font-family);
     font-size: var(--font-size);
     line-height: 1.5;
-    color: #1a1a2e;
+    color: #111111;
     background: #ffffff;
     padding: 0;
     margin: 0;
@@ -87,7 +83,9 @@
 
   /* === HEADER === */
   .header {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #222222;
     /* Un enlace largo (una URL de portafolio, un correo) no puede invadir el
        comienzo del resumen ni salirse del bloque. */
     overflow: hidden;
@@ -95,44 +93,40 @@
 
   .header h1 {
     font-family: var(--font-family);
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
-    color: #1a1a2e;
-    letter-spacing: -0.02em;
-    margin-bottom: 6px;
+    color: #111111;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
     line-height: 1.1;
   }
 
   .header-title {
     font-family: var(--font-family);
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 600;
-    color: var(--accent-color);
+    color: #111111;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     line-height: 1.2;
   }
 
-  .header-gradient {
-    height: 2px;
-    background: linear-gradient(to right, var(--accent-color), var(--secondary-color));
-    border-radius: 1px;
-    margin-bottom: 10px;
-  }
-
+  /* Contacto separado por el `gap` del flex: sin pipes literales ni separadores
+     que queden colgando cuando una URL larga baja a la línea siguiente. */
   .contact-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 14px;
+    gap: 8px 18px;
     font-family: var(--font-family);
     font-size: 10.5px;
     line-height: 1.4;
-    color: #555;
+    color: #111111;
   }
 
   .contact-row a {
-    color: #555;
+    color: #111111;
     text-decoration: none;
     /* Una URL de contacto más larga que la línea se parte en lugar de
        desbordar el encabezado. */
@@ -140,17 +134,8 @@
     overflow-wrap: anywhere;
   }
 
-  /* The separator is generated content on the item BEFORE it, not an element of
-     its own. As its own flex item it was an independent box, so `flex-wrap`
-     could place it first on a new line — and attaching it to the following item
-     instead would only move the problem, since that item starts the wrapped
-     line. Trailing the preceding item, it leaves with that item or not at all.
-     margin-inline-start (logical) keeps RTL — html[lang="ar"] — correct. */
-  .contact-row > *:not(:last-child)::after {
-    content: "|";
-    color: #ccc;
-    margin-inline-start: 14px;   /* matches the 14px column gap above */
-  }
+  /* The separator is the flex gap above: a generated "|" could be left at the
+     end of a line when a long URL wraps, which reads as an orphan. */
 
   /* === OPTIONAL PROFILE PHOTO (opt-in, DACH/European markets — #264) ===
      Off by default: with no candidate.photo the {{PHOTO}} slot is empty, no
@@ -165,7 +150,7 @@
     object-fit: cover;
     margin: 0 0 8px 14px;
     border-radius: 3px;
-    border: 1px solid #e2e2e2;
+    border: 1px solid #222222;
   }
 
   .cv-photo--rounded { border-radius: 8px; }
@@ -174,32 +159,32 @@
 
   /* === SECTIONS === */
   .section {
-    margin-bottom: 18px;
+    margin-bottom: 14px;
   }
 
   .section-title {
     font-family: var(--font-family);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--accent-color);
-    border-bottom: 1.5px solid #e2e2e2;
-    padding-bottom: 4px;
-    margin-bottom: 10px;
+    letter-spacing: 0.1em;
+    color: #111111;
+    border-bottom: 1px solid #222222;
+    padding-bottom: 3px;
+    margin-bottom: 8px;
     line-height: 1.2;
   }
 
   /* === PROFESSIONAL SUMMARY === */
   .summary-text {
     font-size: var(--font-size);
-    line-height: 1.7;
-    color: #2f2f2f;
+    line-height: 1.6;
+    color: #111111;
   }
 
   .summary-text strong {
     font-weight: 700;
-    color: #1a1a1a;
+    color: #111111;
   }
 
   /* Links must never break across lines */
@@ -207,23 +192,9 @@
     white-space: nowrap;
   }
 
-  /* === CORE COMPETENCIES === */
-  .competencies-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .competency-tag {
-    font-family: var(--font-family);
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--tag-color);
-    background: var(--tag-bg);
-    padding: 4px 10px;
-    border-radius: 3px;
-    border: 1px solid var(--tag-border);
-  }
+  /* === COMPETENCIES / SKILLS ===
+     Texto plano, una línea por grupo. Sin etiquetas redondeadas ni fondos: la
+     jerarquía sale del peso y las mayúsculas, no del color. */
 
   /* === WORK EXPERIENCE === */
   .job {
@@ -240,9 +211,9 @@
 
   .job-company {
     font-family: var(--font-family);
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--secondary-color);
+    font-size: 12px;
+    font-weight: 700;
+    color: #111111;
     /* La columna izquierda puede encogerse y partir el nombre; la derecha nunca
        se apila debajo de las fechas. */
     min-width: 0;
@@ -251,7 +222,7 @@
 
   .job-period {
     font-size: 10.5px;
-    color: #777;
+    color: #111111;
     white-space: nowrap;
     flex-shrink: 0;
   }
@@ -259,20 +230,20 @@
   .job-role {
     font-size: var(--font-size);
     font-weight: 600;
-    color: #333;
+    color: #111111;
     margin-bottom: 6px;
   }
 
   .job-location {
     font-size: 10px;
-    color: #888;
+    color: #111111;
   }
 
   .job-context {
     font-style: italic;
     font-size: 10.5px;
     line-height: 1.55;
-    color: #555;
+    color: #111111;
     margin-top: 3px;
   }
 
@@ -284,7 +255,7 @@
   .job li {
     font-size: 10.5px;
     line-height: 1.6;
-    color: #333;
+    color: #111111;
     margin-bottom: 4px;
   }
 
@@ -300,8 +271,8 @@
   .project-title {
     font-family: var(--font-family);
     font-size: 11.5px;
-    font-weight: 600;
-    color: var(--secondary-color);
+    font-weight: 700;
+    color: #111111;
   }
 
   .project-title a {
@@ -315,19 +286,9 @@
     text-decoration: underline;
   }
 
-  .project-badge {
-    font-size: 9px;
-    font-weight: 500;
-    color: var(--accent-color);
-    background: var(--tag-bg);
-    padding: 1px 6px;
-    border-radius: 2px;
-    margin-left: 6px;
-  }
-
   .project-desc {
     font-size: 10.5px;
-    color: #444;
+    color: #111111;
     margin-top: 3px;
     line-height: 1.55;
   }
@@ -340,20 +301,20 @@
   .project li {
     font-size: 10.5px;
     line-height: 1.55;
-    color: #333;
+    color: #111111;
     margin-bottom: 3px;
   }
 
   .project-date {
     font-size: 9.5px;
     font-weight: 400;
-    color: #888;
+    color: #111111;
     margin-left: 6px;
   }
 
   .project-tech {
     font-size: 9.5px;
-    color: #888;
+    color: #111111;
     margin-top: 3px;
   }
 
@@ -372,31 +333,31 @@
   .edu-title {
     font-weight: 600;
     font-size: var(--font-size);
-    color: #333;
+    color: #111111;
     min-width: 0;
     overflow-wrap: break-word;
   }
 
   .edu-org {
-    color: var(--secondary-color);
-    font-weight: 500;
+    color: #111111;
+    font-weight: 600;
   }
 
   .edu-year {
     font-size: 10px;
-    color: #777;
+    color: #111111;
     white-space: nowrap;
     flex-shrink: 0;
   }
 
   .edu-location {
     font-size: 10px;
-    color: #888;
+    color: #111111;
   }
 
   .edu-desc {
     font-size: 10px;
-    color: #666;
+    color: #111111;
     margin-top: 2px;
     line-height: 1.5;
   }
@@ -425,23 +386,23 @@
 
   .cert-title {
     font-size: 10.5px;
-    font-weight: 500;
-    color: #333;
+    font-weight: 600;
+    color: #111111;
   }
 
   .cert-org {
-    color: var(--secondary-color);
+    color: #111111;
   }
 
   /* El guion solo existe si hay emisor: sin emisor no queda un separador solo. */
   .cert-org::before {
     content: " — ";
-    color: #999;
+    color: #222222;
   }
 
   .cert-year {
     font-size: 10px;
-    color: #777;
+    color: #111111;
     white-space: nowrap;
     flex-shrink: 0;
     text-align: right;
@@ -471,22 +432,22 @@
 
   .award-title {
     font-size: 10.5px;
-    font-weight: 500;
-    color: #333;
+    font-weight: 600;
+    color: #111111;
   }
 
   .award-org {
-    color: var(--secondary-color);
+    color: #111111;
   }
 
   .award-org::before {
     content: " — ";
-    color: #999;
+    color: #222222;
   }
 
   .award-year {
     font-size: 10px;
-    color: #777;
+    color: #111111;
     white-space: nowrap;
     flex-shrink: 0;
     text-align: right;
@@ -495,7 +456,7 @@
   /* === INTERESTS === */
   .interests-line {
     font-size: 10.5px;
-    color: #444;
+    color: #111111;
   }
 
   /* === GDPR / RODO CONSENT (footer) === */
@@ -506,24 +467,24 @@
   .cv-consent {
     margin-top: 14px;
     padding-top: 8px;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #222222;
     font-size: 8.5px;
     line-height: 1.4;
-    color: #777;
+    color: #111111;
     text-align: left;
   }
   .cv-consent:empty { display: none; }
 
   /* === SKILLS === */
-  /* Una línea por categoría, como la lista de competencias técnicas: el flex
-     con wrap anterior mezclaba categorías en la misma línea. */
+  /* Una línea por categoría, como la lista de competencias técnicas: sin
+     etiquetas redondeadas, fondos ni columnas. */
   .skills-grid {
     display: block;
   }
 
   .skill-item {
     font-size: 10.5px;
-    color: #444;
+    color: #111111;
     line-height: 1.45;
     margin-bottom: 2px;
   }
@@ -533,8 +494,8 @@
   }
 
   .skill-category {
-    font-weight: 600;
-    color: #333;
+    font-weight: 700;
+    color: #111111;
     font-size: 10.5px;
   }
 
@@ -565,7 +526,6 @@
   .header,
   .edu-item,
   .cert-item,
-  .competency-tag,
   .skill-item {
     break-inside: avoid;
     page-break-inside: avoid;
@@ -623,23 +583,13 @@
   html[lang="ar"] .section-title,
   html[lang="ar"] .job-company,
   html[lang="ar"] .project-title,
-  html[lang="ar"] .competency-tag,
   html[lang="ar"] .skill-category {
     font-family: var(--font-family-override, 'Segoe UI'), 'Segoe UI', Tahoma, Arial, sans-serif;
-  }
-
-  html[lang="ar"] .header-gradient {
-    background: linear-gradient(to left, var(--accent-color), var(--secondary-color));
   }
 
   html[lang="ar"] .job ul {
     padding-right: 18px;
     padding-left: 0;
-  }
-
-  html[lang="ar"] .project-badge {
-    margin-right: 6px;
-    margin-left: 0;
   }
 
   html[lang="ar"] .cert-year {
@@ -673,7 +623,6 @@
   html[lang="ja"] .section-title,
   html[lang="ja"] .job-company,
   html[lang="ja"] .project-title,
-  html[lang="ja"] .competency-tag,
   html[lang="ja"] .skill-category {
    font-family: var(--font-family), 'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
       'Yu Gothic', 'YuGothic', 'Noto Sans CJK JP', 'Noto Sans JP',
@@ -701,7 +650,6 @@
   html[lang="zh-CN"] .job-company,
   html[lang="zh-CN"] .project-title,
   html[lang="zh-CN"] .contact-row,
-  html[lang="zh-CN"] .competency-tag,
   html[lang="zh-CN"] .skill-category,
   html[lang="zh"] .header h1,
   html[lang="zh"] .header-title,
@@ -709,7 +657,6 @@
   html[lang="zh"] .job-company,
   html[lang="zh"] .project-title,
   html[lang="zh"] .contact-row,
-  html[lang="zh"] .competency-tag,
   html[lang="zh"] .skill-category {
     font-family: var(--font-family), 'PingFang SC',
       'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC',
@@ -737,7 +684,6 @@
   html[lang="ko"] .job-company,
   html[lang="ko"] .project-title,
   html[lang="ko"] .contact-row,
-  html[lang="ko"] .competency-tag,
   html[lang="ko"] .skill-category {
     font-family: var(--font-family), 'Apple SD Gothic Neo',
       'Malgun Gothic', 'Noto Sans CJK KR',
@@ -767,7 +713,6 @@
   html[lang="zh-TW"] .job-company,
   html[lang="zh-TW"] .project-title,
   html[lang="zh-TW"] .contact-row,
-  html[lang="zh-TW"] .competency-tag,
   html[lang="zh-TW"] .skill-category {
     font-family: var(--font-family), 'PingFang TC',
       'Microsoft JhengHei', 'Noto Sans CJK TC',
@@ -795,7 +740,6 @@
   <div class="header">
     <h1>{{NAME}}</h1>
     {{TITLE_BLOCK}}
-    <div class="header-gradient"></div>
     <div class="contact-row">
       {{CONTACT_ROW}}
     </div>
@@ -805,14 +749,6 @@
   <div class="section">
     <div class="section-title">{{SECTION_SUMMARY}}</div>
     <div class="summary-text">{{SUMMARY_TEXT}}</div>
-  </div>
-
-  <!-- CORE COMPETENCIES -->
-  <div class="section">
-    <div class="section-title">{{SECTION_COMPETENCIES}}</div>
-    <div class="competencies-grid">
-      {{COMPETENCIES}}
-    </div>
   </div>
 
   <!-- WORK EXPERIENCE -->
@@ -833,6 +769,12 @@
     {{EDUCATION}}
   </div>
 
+  <!-- COMPETENCIES / SKILLS -->
+  <div class="section">
+    <div class="section-title">{{SECTION_SKILLS}}</div>
+    {{SKILLS}}
+  </div>
+
   <!-- CERTIFICATIONS -->
   <div class="section">
     <div class="section-title">{{SECTION_CERTIFICATIONS}}</div>
@@ -849,12 +791,6 @@
   <div class="section">
     <div class="section-title">{{SECTION_INTERESTS}}</div>
     <div class="interests-line">{{INTERESTS}}</div>
-  </div>
-
-  <!-- SKILLS -->
-  <div class="section">
-    <div class="section-title">{{SECTION_SKILLS}}</div>
-    {{SKILLS}}
   </div>
 
   <!-- END -->

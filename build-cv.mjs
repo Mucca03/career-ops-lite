@@ -33,22 +33,22 @@ const TEMPLATE_PATH = resolve(HERE, 'templates/cv-template.html');
 
 const TITLES = {
   en: {
-    summary: 'Professional Summary', competencies: 'Core Competencies',
+    summary: 'Professional Summary',
     experience: 'Work Experience', projects: 'Projects', education: 'Education',
     certifications: 'Certifications', awards: 'Awards & Honors',
     interests: 'Interests', skills: 'Skills',
   },
   es: {
-    summary: 'Perfil Profesional', competencies: 'Competencias Clave',
+    summary: 'Perfil Profesional',
     experience: 'Experiencia Laboral', projects: 'Proyectos', education: 'Educación',
     certifications: 'Certificaciones', awards: 'Logros y Reconocimientos',
-    interests: 'Intereses', skills: 'Habilidades',
+    interests: 'Intereses', skills: 'Competencias',
   },
   pt: {
-    summary: 'Resumo Profissional', competencies: 'Competências',
+    summary: 'Resumo Profissional',
     experience: 'Experiência Profissional', projects: 'Projetos', education: 'Formação',
     certifications: 'Certificações', awards: 'Prêmios', interests: 'Interesses',
-    skills: 'Habilidades',
+    skills: 'Competências',
   },
 };
 
@@ -57,14 +57,13 @@ const TITLES = {
 // se elimina del documento.
 const SECTION_CONTENT = {
   'PROFESSIONAL SUMMARY': 'SUMMARY_TEXT',
-  'CORE COMPETENCIES': 'COMPETENCIES',
   'WORK EXPERIENCE': 'EXPERIENCE',
   PROJECTS: 'PROJECTS',
   EDUCATION: 'EDUCATION',
+  'COMPETENCIES / SKILLS': 'SKILLS',
   CERTIFICATIONS: 'CERTIFICATIONS',
   AWARDS: 'AWARDS',
   INTERESTS: 'INTERESTS',
-  SKILLS: 'SKILLS',
 };
 
 const escapeHtml = (value) => String(value ?? '')
@@ -241,7 +240,10 @@ function certificationsHtml(entries, classes) {
   }).join('\n    ');
 }
 
-function skillsHtml(categories) {
+// Una sola sección de competencias: los grupos de `skills[]` van en una línea
+// por categoría y lo que solo esté en `competencies[]` se añade como una línea
+// plana separada por comas. Nada de etiquetas redondeadas ni categorías fijas.
+function skillsHtml(categories, competencies = []) {
   const kept = list(categories).map((entry) => {
     // Un string suelto se trata como una categoría sin nombre.
     if (typeof entry === 'string') return { category: '', items: [entry] };
@@ -252,12 +254,23 @@ function skillsHtml(categories) {
         : [pick(entry, 'items', 'skills', 'habilidades')].filter(Boolean),
     };
   }).filter((c) => c.items.length > 0);
-  if (kept.length === 0) return '';
-  const items = kept.map((c) => {
+
+  const grouped = new Set(
+    kept.flatMap((c) => list(c.items).map((item) => str(item).toLowerCase())),
+  );
+  const extra = list(competencies)
+    .map((item) => str(item))
+    .filter((item) => item && !grouped.has(item.toLowerCase()));
+
+  const lines = kept.map((c) => {
     const cat = c.category ? `<strong class="skill-category">${escapeHtml(c.category)}:</strong> ` : '';
     return `    <div class="skill-item">${cat}${escapeHtml(list(c.items).join(', '))}</div>`;
-  }).join('\n');
-  return `<div class="skills-grid">\n${items}\n  </div>`;
+  });
+  if (extra.length) {
+    lines.push(`    <div class="skill-item">${escapeHtml(extra.join(', '))}</div>`);
+  }
+  if (lines.length === 0) return '';
+  return `<div class="skills-grid">\n${lines.join('\n')}\n  </div>`;
 }
 
 function normalize(payload) {
@@ -308,7 +321,6 @@ function render(cv) {
 
   const content = {
     SUMMARY_TEXT: escapeHtml(cv.summary),
-    COMPETENCIES: cv.competencies.map((c) => `<span class="competency-tag">${escapeHtml(c)}</span>`).join('\n      '),
     EXPERIENCE: experienceHtml(cv.experience),
     PROJECTS: projectsHtml(cv.projects),
     EDUCATION: educationHtml(cv.education),
@@ -319,7 +331,7 @@ function render(cv) {
       item: 'award-item', main: 'award-main', title: 'award-title', org: 'award-org', year: 'award-year',
     }),
     INTERESTS: cv.interests.map((i, idx) => escapeHtml(idx === 0 ? i : i.charAt(0).toLowerCase() + i.slice(1))).join(', '),
-    SKILLS: skillsHtml(cv.skills),
+    SKILLS: skillsHtml(cv.skills, cv.competencies),
   };
 
   const profileFormat = cv.format === 'a4' || cv.format === 'letter'
@@ -341,7 +353,6 @@ function render(cv) {
     PORTFOLIO_DISPLAY: escapeHtml(cv.portfolio ? displayUrl(cv.portfolio) : ''),
     CONTACT_ROW: contactHtml(cv),
     SECTION_SUMMARY: escapeHtml(titles.summary),
-    SECTION_COMPETENCIES: escapeHtml(titles.competencies),
     SECTION_EXPERIENCE: escapeHtml(titles.experience),
     SECTION_PROJECTS: escapeHtml(titles.projects),
     SECTION_EDUCATION: escapeHtml(titles.education),
@@ -366,9 +377,9 @@ function render(cv) {
 
   // Bloques de sección: se parten por su comentario marcador y se descarta el
   // bloque cuyo contenido quedó vacío.
-  const parts = html.split(/(?=<!-- (?:PROFESSIONAL SUMMARY|CORE COMPETENCIES|WORK EXPERIENCE|PROJECTS|EDUCATION|CERTIFICATIONS|AWARDS|INTERESTS|SKILLS) -->)/);
+  const parts = html.split(/(?=<!-- (?:PROFESSIONAL SUMMARY|WORK EXPERIENCE|PROJECTS|EDUCATION|COMPETENCIES \/ SKILLS|CERTIFICATIONS|AWARDS|INTERESTS) -->)/);
   html = parts.filter((part) => {
-    const marker = part.match(/<!-- ([A-Z][A-Z ]+) -->/);
+    const marker = part.match(/<!-- ([A-Z][A-Z /]+) -->/);
     if (!marker) return true;
     const key = SECTION_CONTENT[marker[1]];
     return !key || String(content[key] ?? '').trim() !== '';
@@ -448,7 +459,8 @@ Lee un payload YAML y rellena templates/cv-template.html.`);
   }
 
   const bullets = cv.experience.reduce((sum, e) => sum + list(pick(e, 'bullets', 'logros') ?? []).length, 0);
-  const summary = `${cv.experience.length} rol(es), ${bullets} bullet(s), ${cv.competencies.length} competencia(s)`;
+  const skillLines = cv.skills.length + (cv.skills.length === 0 && cv.competencies.length ? 1 : 0);
+  const summary = `${cv.experience.length} rol(es), ${bullets} bullet(s), ${skillLines} línea(s) de competencias`;
 
   if (check) {
     console.log(`✅ payload válido — ${summary}`);

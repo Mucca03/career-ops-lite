@@ -120,6 +120,22 @@ Decídelo leyendo `cv.md`, nunca por el nombre del candidato:
 - Los títulos de sección salen de `lang`: es "Proyectos", en "Projects",
   pt "Projetos". Nunca "Experiencia laboral" para proyectos.
 
+**Orden (estructura ATS).** El CV va siempre en este orden vertical; cada
+sección desaparece si no tiene datos:
+
+1. Encabezado: nombre, titular y contacto inline.
+2. Resumen / Perfil Profesional.
+3. Experiencia y/o Proyectos: con experiencia, Experiencia primero y Proyectos
+   debajo; sin experiencia formal (`entry`), Proyectos va justo después del
+   resumen.
+4. Educación: título e institución a la izquierda, fecha a la derecha.
+5. Competencias / Habilidades: una sola sección, texto plano.
+6. Certificaciones / Logros: una fila por ítem, año a la derecha.
+
+**Estilo:** monocromático (texto `#111111`, reglas `#222`); la jerarquía sale
+del peso, el tamaño, las mayúsculas y los bordes finos, nunca del color. Sin
+badges, "pills" ni fondos tintados.
+
 **Relevancia:** dentro de cada sección, primero el ítem que más coincida con los
 requisitos centrales de la oferta (stack, dominio, herramientas); empate → el más
 reciente.
@@ -139,9 +155,12 @@ del inglés.
 **Encabezado:** todos los links de `profile.yml` que existan (github, portfolio,
 linkedin, links[]); omite los ausentes. `build-cv.mjs` no deja separadores vacíos.
 
-**Competencias:** solo tecnologías que aparezcan en un bullet o en el stack de un
-ítem **incluido** en este CV. Lo que la oferta pida y no esté respaldado es brecha.
-Si usas `skills[]`, cada categoría y cada ítem siguen la misma regla.
+**Competencias:** una sola sección en todo el CV. Con `skills[]` se pinta
+`Categoría: ítem 1, ítem 2` (una línea por categoría, máximo 4, categorías
+dinámicas según el perfil y la oferta); `competencies[]` plano va como lista
+separada por comas y nunca como una segunda sección. Solo tecnologías que
+aparezcan en un bullet o en el stack de un ítem **incluido** en este CV. Lo que
+la oferta pida y no esté respaldado es brecha.
 
 **Certificaciones:** hasta 3 relevantes, si están en `cv.md`. No las recortes
 antes que proyectos poco relevantes.
@@ -231,6 +250,9 @@ certifications:
 - `skills[]` agrupa por categorías que salgan de `cv.md` o que deduzcas del área
   y de la oferta: no hay categorías predefinidas. Máximo 4 líneas, categoría en
   `lang`, y solo competencias respaldadas por un ítem incluido (A5).
+  `competencies[]` es la alternativa plana para perfiles que no agrupan: se
+  pinta como una lista separada por comas dentro de la misma sección, no como
+  etiquetas ni como otra sección.
 - Contribuciones externas (open source, voluntariado, publicaciones, ponencias,
   trabajo pro bono) van en su sección natural con `url` y su estado real
   ("mergeado", "publicado"). Describe su tamaño real: una contribución es una
